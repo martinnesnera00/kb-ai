@@ -5,6 +5,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "scripts"))
 
+from scripts.outlier_detector import OutlierDetector
+from scripts.missing_data_analyzer import MissingDataAnalyzer
+from scripts.duplicate_detector import DuplicateDetector
+from scripts.data_type_validator import DataTypeValidator
+
 DATA_FILE = Path(__file__).parent / "test-data.csv"
 
 
@@ -30,6 +35,36 @@ def print_stats(column, stats):
 
 
 if __name__ == "__main__":
+    schema = {
+        "Time": {"type": "date", "format": "%H:%M:%S"},
+        "Cluster": {"type": "float"}
+    }
+
+    domain_rules = {
+        "Cluster": {"min": 0}
+    }
+
+    missing = MissingDataAnalyzer(DATA_FILE)
+    missing.analyze()
+    missing.print_report()
+
+    data_type = DataTypeValidator(DATA_FILE, schema)
+    data_type.validate()
+    data_type.print_report()
+
+    outliers = OutlierDetector(DATA_FILE, domain_rules=domain_rules)
+    outliers.analyze_all(statistical_method="iqr", threshold=1.5)
+    outliers.print_report()
+
+    dupes = DuplicateDetector(DATA_FILE, key_columns=["Time"], fuzzy_threshold=0)
+    dupes.analyze_all(include_fuzzy=False)
+    dupes.print_report()
+
+    # not needed for metrics
+    #checker = ConsistencyChecker(DATA_FILE)
+    #checker.validate_all()
+    #checker.print_report()
+
     df = pd.read_csv(DATA_FILE)
     numeric_cols = df.select_dtypes(include=[np.number]).columns
 

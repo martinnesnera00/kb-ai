@@ -1,4 +1,4 @@
-Time,"""(cluster-""k8s-prod-0637"", container= ""POD'', id=/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-pod31360506_f089_40f6_a197."
+Time,Cluster
 09:00:00,79661
 09:00:30,79661
 09:01:00,78604
