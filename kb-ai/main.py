@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(Path(__file__).parent / "scripts"))
 
@@ -13,15 +14,19 @@ from scripts.data_type_validator import DataTypeValidator
 DATA_FILE = Path(__file__).parent / "test-data.csv"
 
 
-def compute_stats(series):
-    values = series.dropna().values
+def compute_stats(series, window=10):
+    values = series.dropna()
+    arr = values.values
+    rolling = values.rolling(window)
     return {
-        "mean":   float(np.mean(values)),
-        "stddev": float(np.std(values)),
-        "p95":    float(np.percentile(values, 95)),
-        "p99":    float(np.percentile(values, 99)),
-        "max":    float(np.max(values)),
-        "delta":  float(np.max(values) - np.min(values)),
+        "mean":         float(np.mean(series)),
+        "stddev":       float(np.std(series)),
+        "p95":          float(np.percentile(series, 95)),
+        "p99":          float(np.percentile(series, 99)),
+        "max":          float(np.max(series)),
+        "max_delta":     float(values.diff().abs().max()),
+        "rolling_mean": float(rolling.mean().iloc[-1]),
+        "rolling_std":  float(rolling.std().mean()),
     }
 
 
@@ -71,3 +76,15 @@ if __name__ == "__main__":
     for col in numeric_cols:
         stats = compute_stats(df[col])
         print_stats(col, stats)
+
+
+    df["Time"] = pd.to_date=time(df["Time"])
+
+    plt.figure(figsize=(12,4))
+    plt.plot(df["Time"], df.iloc[:,1])
+
+    plt.xlabel("Time")
+    plt.ylabel("Value")
+
+    plt.tight_layout()
+    plt.show()
